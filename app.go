@@ -11,11 +11,27 @@ import (
 	officeUsecasePkg "github.com/rahmatismail/sample-go/internal/office/usecase"
 )
 
+type (
+	CoreDependency struct {
+		HttpRouter *httprouter.Router
+	}
+)
+
 func main() {
 	// core
 	router := httprouter.New()
 
-	// main
+	cd := CoreDependency{
+		HttpRouter: router,
+	}
+	// end init core dependency
+	InitSampleGo(cd)
+
+	log.Println("listening on :8080")
+	log.Fatal(http.ListenAndServe(":8080", router))
+}
+
+func InitSampleGo(dep CoreDependency) {
 	// init repository
 	// employee
 	employeeStaticRepo := employeeRepoPkg.New()
@@ -34,10 +50,8 @@ func main() {
 	// office
 	officeHandlerRestDependency := officeHandlerRestPkg.Dependency{
 		OfficeUsecase: officeUsecase,
-		HttpRouter:    router,
+		HttpRouter:    dep.HttpRouter,
 	}
 	officeHandlerRestPkg.RegisterRoute(officeHandlerRestDependency)
 
-	log.Println("listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
 }
